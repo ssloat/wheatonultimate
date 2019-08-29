@@ -2,9 +2,9 @@ import os
 import http.client
 
 channels = {
-    'soccer': (os.environ.get('DISCORD_SOCCER'), '@soccer'),
-    'ultimate': (os.environ.get('DISCORD_ULTIMATE'), '@ultimate'),
-    'social': (os.environ.get('DISCORD_SOCIAL'), '@social'),
+    'soccer': (os.environ.get('DISCORD_SOCCER'), '<@&613218877165535232>'),
+    'ultimate': (os.environ.get('DISCORD_ULTIMATE'), '<@&613215568274915341>'),
+    'social': (os.environ.get('DISCORD_SOCIAL'), '<@&613728159069634560>'),
     #'housing': (os.environ.get('DISCORD_HOUSING'), '@social'),
 }
 
