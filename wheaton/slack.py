@@ -2,6 +2,7 @@ import os
 import re
 import smtplib
 import logging
+import urllib
 
 from slackclient import SlackClient
 
@@ -39,13 +40,14 @@ class Bot(object):
         self.channels = dict([(x['id'], x['name']) for x in channels['channels']])
         self.channel_ids = dict( (v, k) for k, v in self.channels.items() )
 
-    def channel_id(self, group):
-        group_map = {
-            'wheaton-soccer': 'sports-soccer',
-            'wheaton-ultimate': 'social',
+    def channel_id(self, topic):
+        topic_map = {
+            'soccer': 'sports-soccer',
+            'ultimate': 'sports-ultimate',
+            'social': 'social',
+            'housing': 'housing',
         }
-        #return self.channel_ids[ group_map.get(msg['group'], 'sloat-testing') ]
-        return self.channel_ids[ group_map.get(group, 'sloat-testing') ]
+        return self.channel_ids[ topic_map.get(topic, 'sloat-testing') ]
         #return self.channel_ids['sloat-testing']
 
     def _init_members(self):
@@ -58,8 +60,15 @@ class Bot(object):
         """
         pass
 
-    def post(self, group, subject, from_, body, channel, **args):
-        ch_id = self.channel_id(group)
+    def post(self, topic, subject, from_, body, channel, **args):
+        ch_id = self.channel_id(topic)
+
+        subj = subject
+        if subj[:4] != 'Re: ':
+            subj = 'Re: '+subj
+
+        subj = urllib.parse.urlencode([('subject', subject)])
+        from_ = '<mailto:%s?%s|%s>' % (from_[1], subj.replace('+', ' '), from_[0]) 
 
         text = "%sFrom %s: %s\n%s" % (
             ('<!channel> ' if channel else ''),

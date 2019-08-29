@@ -65,6 +65,15 @@ class Inbox(object):
 
         msg['tags'] = tags.msg_tags(msg)
 
+        if msg['group'] == 'wheaton-soccer':
+            msg['topic'] = 'soccer'
+        elif 'ultimate' in msg['tags']:
+            msg['topic'] = 'ultimate'
+        elif 'housing' in msg['tags']:
+            msg['topic'] = 'housing'
+        else:
+            msg['topic'] = 'social'
+
         return msg
 
     def parse_body(self, txt):
@@ -88,17 +97,6 @@ class Inbox(object):
 
         return body
 
-
-def parse_from(msg): 
-    addr = email.utils.parseaddr(msg['from'])
-
-    subj = msg['subject']
-    if subj[:4] != 'Re: ':
-        subj = 'Re: '+subj
-
-    subj = urllib.parse.urlencode([('subject', msg['subject'])])
-    subj = subj.replace('+', ' ')
-    return '<mailto:%s?%s|%s>' % (addr[1], subj, addr[0]) 
 
 def get_text(msg):
     text = ""

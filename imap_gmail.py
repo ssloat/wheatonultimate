@@ -1,4 +1,5 @@
 import datetime
+import email
 import os
 import sys
 import argparse
@@ -31,8 +32,9 @@ def main():
     date = datetime.date.today() - datetime.timedelta(days=delta)
 
     timestamps = {}
-    for uid in ['1917']: #inbox.search(date):
-        uid = uid.decode('utf-8')
+    uids = [int(u.decode('utf-8')) for u in inbox.search(date)]
+    for uid in sorted(uids):
+        uid = str(uid)
         if slack_db.emails.find_one({'uid': uid}):
             print("Found email with uid %s" % uid)
             continue
@@ -44,9 +46,10 @@ def main():
         slack_db.emails.insert_one(msg) 
 
         msg_args = {
+            'topic': msg['topic'],
             'group': msg['group'],
             'subject': msg['subject'],
-            'from_': imap.parse_from(msg),
+            'from_': email.utils.parseaddr(msg['from']),
             'body': msg['body'],
             'channel': False,
         }
