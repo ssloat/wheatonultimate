@@ -5,7 +5,7 @@ channels = {
     'soccer': (os.environ.get('DISCORD_SOCCER'), '<@&613218877165535232>'),
     'ultimate': (os.environ.get('DISCORD_ULTIMATE'), '<@&613215568274915341>'),
     'social': (os.environ.get('DISCORD_SOCIAL'), '<@&613728159069634560>'),
-    #'housing': (os.environ.get('DISCORD_HOUSING'), '@social'),
+    'housing': (os.environ.get('DISCORD_HOUSING'), '<@&616489369544687616>'),
 }
 
 
@@ -16,7 +16,7 @@ def post(topic, subject, from_, body, channel, **args):
 
     webhook, label = channels[topic]
 
-    msg = "%sFrom %s (%s): %s\n%s" % (
+    msg = "%sFrom %s (%s):\n%s\n%s" % (
         (label+' ' if channel else ''), 
         from_[0], from_[1], subject, body
     )
@@ -36,7 +36,7 @@ def send_msg(webhook, msg):
 
     webhookurl = "https://discordapp.com/api/webhooks/"+webhook
     connection = http.client.HTTPSConnection("discordapp.com")
-    connection.request("POST", webhookurl, formdata, {
+    connection.request("POST", webhookurl, formdata.encode('utf-8'), {
         'content-type': "multipart/form-data; boundary=%s" % boundary,
         'cache-control': "no-cache",
     })
