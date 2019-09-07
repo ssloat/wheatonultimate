@@ -2,14 +2,14 @@ from __future__ import print_function
 import pickle
 import email
 import base64
-import os.path
+import os
 from googleapiclient.discovery import build
 
 from wheaton import tags, mime
 
 class Inbox(object):
     def __init__(self):
-        with open('token.pickle', 'rb') as token:
+        with open(os.environ.get('GMAIL_TOKEN_FN'), 'rb') as token:
             creds = pickle.load(token)
 
         self.service = build('gmail', 'v1', credentials=creds)
