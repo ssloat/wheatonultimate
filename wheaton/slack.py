@@ -60,7 +60,7 @@ class Bot(object):
         """
         pass
 
-    def post(self, topic, subject, from_, body, channel, **args):
+    def post(self, topic, subject, from_, body, channel):
         ch_id = self.channel_id(topic)
 
         subj = subject
@@ -70,11 +70,21 @@ class Bot(object):
         subj = urllib.parse.urlencode([('subject', subject)])
         from_ = '<mailto:%s?%s|%s>' % (from_[1], subj.replace('+', ' '), from_[0]) 
 
+        if len(body) > 600:
+            n = 450
+            while body[n] != ' ':
+                n -= 1
+
+            msg_parts = [body[:n]+'...', '...'+body[n:]]
+
+        else:
+            msg_parts = [body]
+
         text = "%sFrom %s: %s\n%s" % (
             ('<!channel> ' if channel else ''),
             from_, 
             subject,
-            (body[:450]+'...' if len(body) > 600 else body),
+            msg_parts[0],
         )
 
         result = self.slack_client.api_call(
@@ -82,17 +92,15 @@ class Bot(object):
             channel=ch_id,
             text=text,
             as_user=True,
-            **args
         )
         
-        if len(body) > 600:
+        if len(msg_parts) > 1:
             self.slack_client.api_call(
                 "chat.postMessage", 
                 channel=ch_id,
-                text="...%s" % body[450:],
+                text=msg_parts[1],
                 as_user=True,
                 thread_ts=result['ts'],
-                **args
             )
 
         return result['ts']
