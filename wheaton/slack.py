@@ -60,7 +60,7 @@ class Bot(object):
         """
         pass
 
-    def post(self, topic, subject, from_, body, channel):
+    def post(self, topic, subject, from_, body, channel, thread_ts=None, **kvargs):
         ch_id = self.channel_id(topic)
 
         subj = subject
@@ -69,6 +69,18 @@ class Bot(object):
 
         subj = urllib.parse.urlencode([('subject', subject)])
         from_ = '<mailto:%s?%s|%s>' % (from_[1], subj.replace('+', ' '), from_[0]) 
+
+        heading = "%sFrom %s: %s\n" % (('<!channel> ' if channel else ''), from_, subject)
+
+        if thread_ts:
+            self.slack_client.api_call(
+                "chat.postMessage", 
+                channel=ch_id,
+                text=heading+body,
+                as_user=True,
+                thread_ts=thread_ts,
+            )
+            return
 
         if len(body) > 600:
             n = 450
@@ -80,17 +92,10 @@ class Bot(object):
         else:
             msg_parts = [body]
 
-        text = "%sFrom %s: %s\n%s" % (
-            ('<!channel> ' if channel else ''),
-            from_, 
-            subject,
-            msg_parts[0],
-        )
-
         result = self.slack_client.api_call(
             "chat.postMessage", 
             channel=ch_id,
-            text=text,
+            text=heading+msg_parts[0],
             as_user=True,
         )
         

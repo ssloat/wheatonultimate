@@ -1,5 +1,10 @@
+import json
+import logging
 import os
 import re
+import requests
+import time
+
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
 channels = {
@@ -11,8 +16,30 @@ channels = {
     'testing': (os.environ.get('DISCORD_TESTING'), '<@&618295398620069909> '),
 }
 
+class Webhook(DiscordWebhook):
+    def execute(self):
+        """
+        execute Webhook
+        :return:
+        """
+        if bool(self.files) is False:
+            response = requests.post(self.url, json=self.json, proxies=self.proxies)
+        else:
+            self.files['payload_json'] = (None, json.dumps(self.json))
+            response = requests.post(self.url, files=self.files, proxies=self.proxies)
 
-def post(topic, subject, from_, body, channel, attachments):
+        if response.status_code in [200, 204]:
+            logging.debug("Webhook executed")
+        else:
+            logging.error('status code %s: %s' % (
+                response.status_code, response.content.decode("utf-8"))
+            )
+
+        return response
+
+
+def post(topic, subject, from_, body, channel, attachments=None):
+    attachments = attachments or []
     print(topic)
     if topic not in channels:
         return
@@ -30,7 +57,7 @@ def post(topic, subject, from_, body, channel, attachments):
     body = re.sub(r'(\S+)\s+(<https?:\S+?>)', repl, body)
 
     content = "%s %s " % (label, from_[1]) if channel else from_[1]
-    hook = DiscordWebhook(url=webhook_url, content=content)
+    hook = Webhook(url=webhook_url, content=content)
 
     body_parts = split_body(body)
 
@@ -44,8 +71,16 @@ def post(topic, subject, from_, body, channel, attachments):
     for filename, a in attachments:
         hook.add_file(file=a, filename=filename)
 
-    hook.execute()
+    resp = hook.execute()
+    if resp.status_code == 429:
+        millis = json.loads(resp.content.decode("utf-8"))['retry_after']
+        secs = int(millis / 1000) + 1
+        logging.info("Sleep %d" % secs)
+        time.sleep(secs)
 
+        hook.execute()
+
+    time.sleep(2) # discord doesn't like you posting too aggresively
 
 
 def split_body(body):
