@@ -31,7 +31,7 @@ def main():
 
     for msg in inbox.get(mids):
         print(dict((k, msg[k]) for k in ('from', 'subject', 'body')))
-        mongo_db.emails.insert_one(msg) 
+        mongo_db.emails.insert_one(dict((k, v) for k, v in msg.items() if k != 'attachments')) 
 
         msg_args = {
             'topic': msg['topic'],
