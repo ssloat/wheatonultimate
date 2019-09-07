@@ -41,12 +41,11 @@ def post(topic, subject, from_, body, channel, attachments):
     for bp in body_parts[1:]:
         hook.add_embed(DiscordEmbed(description=bp, color=242424))
 
+    for filename, a in attachments:
+        hook.add_file(file=a, filename=filename)
+
     hook.execute()
 
-    for filename, a in attachments:
-        h = DiscordWebhook(url=webhook_url)
-        h.add_file(file=a, filename=filename)
-        h.execute()
 
 
 def split_body(body):
