@@ -54,7 +54,7 @@ def post(topic, subject, from_, body, channel, attachments=None):
 
     body = re.sub(r'(\S+)\s+(<https?:\S+?>)', repl, body)
 
-    content = [label if channel else []
+    content = [label] if channel else []
     content.extend([
         "> **%s**" % from_[0],
         "> **%s**" % subject,
