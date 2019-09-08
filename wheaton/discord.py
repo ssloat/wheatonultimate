@@ -49,20 +49,22 @@ def post(topic, subject, from_, body, channel, attachments=None):
 
     subject = subject.replace('||', '//')
 
-    urls_in_body = []
     def repl(m):
-        urls_in_body.append(m.group(2)[1:-1])
         return "[%s](%s)" % (m.group(1), m.group(2)[1:-1])
 
     body = re.sub(r'(\S+)\s+(<https?:\S+?>)', repl, body)
 
-    content = "%s %s " % (label, from_[1]) if channel else from_[1]
-    hook = Webhook(url=webhook_url, content=content)
+    content = [label if channel else []
+    content.extend([
+        "> **%s**" % from_[0],
+        "> **%s**" % subject,
+        from_[1],
+    ])
+    hook = Webhook(url=webhook_url, content="\n".join(content))
 
     body_parts = split_body(body)
 
-    embed = DiscordEmbed(title=subject, description=body_parts[0], color=242424)
-    embed.set_author(name=from_[0]) #, url='author url', icon_url='author icon url')
+    embed = DiscordEmbed(description=body_parts[0], color=242424)
     hook.add_embed(embed)
 
     for bp in body_parts[1:]:
