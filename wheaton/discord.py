@@ -18,10 +18,6 @@ channels = {
 
 class Webhook(DiscordWebhook):
     def execute(self):
-        """
-        execute Webhook
-        :return:
-        """
         if bool(self.files) is False:
             response = requests.post(self.url, json=self.json, proxies=self.proxies)
         else:
@@ -52,16 +48,24 @@ def post(topic, subject, from_, body, channel, attachments=None):
     def repl(m):
         return "[%s](%s)" % (m.group(1), m.group(2)[1:-1])
 
-    body = re.sub(r'(\S+)\s+(<https?:\S+?>)', repl, body)
+    body = body.replace("=\r\n", '').replace("=\n", '')
+    body = re.sub(r"(\S+)\n(<http\S+>)", repl, body)
 
-    content = [label] if channel else []
-    content.extend([
-        "> **%s**" % from_[0],
-        "> **%s**" % subject,
-        from_[1],
-    ])
-    hook = Webhook(url=webhook_url, content="\n".join(content))
+    content = [
+        "**%s**" % subject,
+        "**%s** - %s" % (from_[0], from_[1])
+    ]
 
+    if channel:
+        content.append(label)
+
+    content = "\n".join(content)
+    n = len(content)
+    content += "\n>>> %s" % body
+    
+    hook = Webhook(url=webhook_url, content=content)
+
+    """
     body_parts = split_body(body)
 
     embed = DiscordEmbed(description=body_parts[0], color=242424)
@@ -69,6 +73,7 @@ def post(topic, subject, from_, body, channel, attachments=None):
 
     for bp in body_parts[1:]:
         hook.add_embed(DiscordEmbed(description=bp, color=242424))
+    """
 
     for filename, a in attachments:
         hook.add_file(file=a, filename=filename)

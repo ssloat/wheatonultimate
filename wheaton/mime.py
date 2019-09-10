@@ -13,7 +13,7 @@ def get_body(msg):
 def remove_suffix(txt):
     lines = txt.splitlines()
     for n, line in list(enumerate(lines)):
-        if line == '-- ' \
+        if line == '-- ' or line == '--=20' \
                 or line.startswith('From: wheaton-ultimate@googlegroups.com') \
                 or re.match(r'-+$', line):
                     
