@@ -17,7 +17,7 @@ def main():
     slack_bot = slack.Bot()
     inbox = gmail.Inbox()
 
-    date = datetime.date.today() - datetime.timedelta(days=7)
+    date = datetime.date.today() - datetime.timedelta(days=2)
 
     query = " ".join([
         'list:{wheaton-ultimate@googlegroups.com wheaton-soccer@googlegroups.com}',
