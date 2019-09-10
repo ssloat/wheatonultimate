@@ -13,7 +13,7 @@ def msg_tags(msg):
         tags.append('event')
         if msg['group'] == 'wheaton-soccer':
             tags.append('soccer')
-        elif any([x in subject for x in ('monroe', 'scripture', 'lawson')]):
+        elif any([x in subject for x in ('monroe', 'scripture', 'lawson', 'east campus')]):
             tags.append('ultimate')
 
     else: 
