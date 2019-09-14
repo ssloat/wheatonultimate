@@ -16,22 +16,37 @@ channels = {
     'testing': (os.environ.get('DISCORD_TESTING'), '<@&618295398620069909> '),
 }
 
+def requests_post(url, json, files=None):
+    if bool(files) is False:
+        response = requests.post(url, json=json)
+    else:
+        files['payload_json'] = (None, json.dumps(json))
+        response = requests.post(url, files=files)
+
+    if response.status_code in [200, 204]:
+        logging.debug("Webhook executed")
+
+    elif response.status_code == 429:
+        millis = json.loads(resp.content.decode("utf-8"))['retry_after']
+        secs = int(millis / 1000) + 1
+        logging.info("Sleep %d" % secs)
+        time.sleep(secs)
+
+    else:
+        logging.error('status code %s: %s' % (
+            response.status_code, response.content.decode("utf-8"))
+        )
+
+
 class Webhook(DiscordWebhook):
     def execute(self):
-        if bool(self.files) is False:
-            response = requests.post(self.url, json=self.json, proxies=self.proxies)
-        else:
-            self.files['payload_json'] = (None, json.dumps(self.json))
-            response = requests.post(self.url, files=self.files, proxies=self.proxies)
+        requests.post(self.url, self.json, self.files)
 
-        if response.status_code in [200, 204]:
-            logging.debug("Webhook executed")
-        else:
-            logging.error('status code %s: %s' % (
-                response.status_code, response.content.decode("utf-8"))
-            )
+def adjust_body(body):
+    def repl(m):
+        return "[%s](%s)" % (m.group(1), m.group(2)[1:-1])
 
-        return response
+    return re.sub(r"(\S+)\s?(<http\S+?>)", repl, body)
 
 
 def post(topic, subject, from_, body, channel, attachments=None):
@@ -44,12 +59,7 @@ def post(topic, subject, from_, body, channel, attachments=None):
     webhook_url = "https://discordapp.com/api/webhooks/"+webhook_url
 
     subject = subject.replace('||', '//')
-
-    def repl(m):
-        return "[%s](%s)" % (m.group(1), m.group(2)[1:-1])
-
-    body = body.replace("=\r\n", '').replace("=\n", '')
-    body = re.sub(r"(\S+)\n(<http\S+>)", repl, body)
+    body = adjust_body(body)
 
     content = [
         "**%s**" % subject,
@@ -78,14 +88,7 @@ def post(topic, subject, from_, body, channel, attachments=None):
     for filename, a in attachments:
         hook.add_file(file=a, filename=filename)
 
-    resp = hook.execute()
-    if resp.status_code == 429:
-        millis = json.loads(resp.content.decode("utf-8"))['retry_after']
-        secs = int(millis / 1000) + 1
-        logging.info("Sleep %d" % secs)
-        time.sleep(secs)
-
-        hook.execute()
+    hook.execute()
 
     time.sleep(2) # discord doesn't like you posting too aggresively
 
