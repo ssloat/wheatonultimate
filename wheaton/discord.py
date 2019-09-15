@@ -72,7 +72,7 @@ def post(topic, subject, from_, body, channel, attachments=None):
 
     content = "\n".join(content)
     n = len(content)
-    content += "\n>>> %s\n" % (body, from_[1])
+    content += "\n>>> %s\n%s" % (body, from_[1])
     
     hook = Webhook(url=webhook_url, content=content, username=from_[0])
 
