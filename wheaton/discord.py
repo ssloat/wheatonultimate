@@ -16,6 +16,7 @@ channels = {
     'testing': (os.environ.get('DISCORD_TESTING'), '<@&618295398620069909> '),
 }
 
+# https://birdie0.github.io/discord-webhooks-guide/discord_webhook.html
 def requests_post(url, json, files=None):
     if bool(files) is False:
         response = requests.post(url, json=json)
@@ -63,7 +64,7 @@ def post(topic, subject, from_, body, channel, attachments=None):
 
     content = [
         "**%s**" % subject,
-        "**%s** - %s" % (from_[0], from_[1])
+        #"%s" % (from_[0], from_[1])
     ]
 
     if channel:
@@ -71,9 +72,9 @@ def post(topic, subject, from_, body, channel, attachments=None):
 
     content = "\n".join(content)
     n = len(content)
-    content += "\n>>> %s" % body
+    content += "\n>>> %s\n" % (body, from_[1])
     
-    hook = Webhook(url=webhook_url, content=content)
+    hook = Webhook(url=webhook_url, content=content, username=from_[0])
 
     """
     body_parts = split_body(body)
