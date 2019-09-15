@@ -62,17 +62,11 @@ def post(topic, subject, from_, body, channel, attachments=None):
     subject = subject.replace('||', '//')
     body = adjust_body(body)
 
-    content = [
-        "**%s**" % subject,
-        #"%s" % (from_[0], from_[1])
-    ]
-
-    if channel:
-        content.append(label)
-
-    content = "\n".join(content)
+    content = "**%s**" % subject
     n = len(content)
     content += "\n>>> %s\n%s" % (body, from_[1])
+    if channel:
+        content += "\n%s" % label
     
     hook = Webhook(url=webhook_url, content=content, username=from_[0])
 
