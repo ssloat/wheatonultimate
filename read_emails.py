@@ -8,10 +8,10 @@ from pymongo import MongoClient
 from wheaton import gmail, discord, slack
 
 def main():
-    #logging.basicConfig(
-    #    level=logging.INFO,
-    #    format='%(asctime)s %(name)s %(levelname)-8s %(message)s',
-    #)
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s %(name)s %(levelname)-8s %(message)s',
+    )
 
     mongo_db = MongoClient(os.environ.get('MONGO_DB_URI'), retryWrites=False)['slack']
     slack_bot = slack.Bot()
