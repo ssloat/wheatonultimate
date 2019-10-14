@@ -25,7 +25,7 @@ def requests_post(url, json, files=None):
         response = requests.post(url, files=files)
 
     if response.status_code in [200, 204]:
-        logging.debug("Webhook executed")
+        logging.info("Webhook executed")
 
     elif response.status_code == 429:
         millis = json.loads(resp.content.decode("utf-8"))['retry_after']
@@ -41,7 +41,7 @@ def requests_post(url, json, files=None):
 
 class Webhook(DiscordWebhook):
     def execute(self):
-        requests.post(self.url, self.json, self.files)
+        requests_post(self.url, self.json, self.files)
 
 def adjust_body(body):
     def repl(m):
@@ -61,37 +61,28 @@ def post(topic, subject, from_, body, channel, attachments=None):
 
     subject = subject.replace('||', '//')
     body = adjust_body(body)
-
-    content = "**%s**" % subject
-    n = len(content)
-    content += "\n>>> %s\n%s" % (body, from_[1])
+    body_parts = split_body(body, 1900-len(subject))
     if channel:
-        content += "\n%s" % label
-    
-    hook = Webhook(url=webhook_url, content=content, username=from_[0])
+        body_parts[0] += "\n%s" % label
 
-    """
-    body_parts = split_body(body)
+    for i, part in enumerate(body_parts):
+        content = "> **%s**\n%s" % (subject, part)
+        hook = Webhook(url=webhook_url, content=content, username=from_[0])
 
-    embed = DiscordEmbed(description=body_parts[0], color=242424)
-    hook.add_embed(embed)
+        if i == len(body_parts)-1:
+            hook.content += "\n%s" % from_[1]
+            for filename, a in attachments:
+                hook.add_file(file=a, filename=filename)
 
-    for bp in body_parts[1:]:
-        hook.add_embed(DiscordEmbed(description=bp, color=242424))
-    """
+        hook.execute()
 
-    for filename, a in attachments:
-        hook.add_file(file=a, filename=filename)
-
-    hook.execute()
-
-    time.sleep(2) # discord doesn't like you posting too aggresively
+        time.sleep(2) # discord doesn't like you posting too aggresively
 
 
-def split_body(body):
+def split_body(body, l=1950):
     parts = []
-    while len(body) > 2048:
-        n = 2048
+    while len(body) > l:
+        n = l
         while body[n] != ' ':
             n -= 1
 
@@ -100,6 +91,13 @@ def split_body(body):
 
     if body:
         parts.append(body)
+
+    for i in range(len(parts)):
+        if i > 0:
+            parts[i] = '...%s' % parts[i]
+
+        if i != len(parts) - 1:
+            parts[i] += '...'
 
     return parts
 
