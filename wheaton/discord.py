@@ -41,7 +41,29 @@ def requests_post(url, json, files=None):
 
 class Webhook(DiscordWebhook):
     def execute(self):
-        requests_post(self.url, self.json, self.files)
+        """
+        execute Webhook
+        :return:
+        """
+        #requests_post(self.url, self.json, self.files)
+        if bool(self.files) is False:
+            response = requests.post(self.url, json=self.json, proxies=self.proxies)
+        else:
+            self.files['payload_json'] = (None, json.dumps(self.json))
+            response = requests.post(self.url, files=self.files, proxies=self.proxies)
+
+        if response.status_code in [200, 204]:
+            logging.debug("Webhook executed")
+
+        elif response.status_code == 429:
+            millis = json.loads(resp.content.decode("utf-8"))['retry_after']
+            secs = int(millis / 1000) + 1
+            logging.info("Sleep %d" % secs)
+            time.sleep(secs)
+
+        else:
+            logging.error('status code %s: %s' % (response.status_code, response.content.decode("utf-8")))
+
 
 def adjust_body(body):
     def repl(m):
