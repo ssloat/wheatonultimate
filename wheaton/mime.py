@@ -7,27 +7,7 @@ from wheaton import tags
 
 def get_body(msg):
     parts = [part for part in msg.walk() if part.get_content_type() == 'text/plain']
-    body = " ".join([remove_suffix(p.get_payload()) for p in parts])
-
-    lens = [l for l in body.splitlines() if len(l) > 75]
-    if not lens:
-        print("looks like fixed width")
-        lines = body.splitlines()
-        for n in range(len(lines) - 1):
-            if re.match(r'.*[.?!]$', lines[n]):
-                lines[n] += "\n"
-                continue
-
-            match = re.match('(\S+)', lines[n+1])
-            if not match or len(lines[n]) + len(match.group(1)) < 75:
-                lines[n] += "\n"
-
-            else:
-                lines[n] += " " 
-
-        body = "".join(lines)
-
-    return body
+    return " ".join([remove_suffix(p.get_payload(decode=True).decode('utf-8')) for p in parts])
 
 
 def remove_suffix(txt):
