@@ -6,3 +6,6 @@ guids.txt
 setup.sh
 filters.txt
 .python-version
+tmp/
+credentials.json
+token.pickle
