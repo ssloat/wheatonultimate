@@ -6,28 +6,57 @@ import re
 from wheaton import tags
 
 def get_body(msg):
-    parts = [part for part in msg.walk() if part.get_content_type() == 'text/plain']
-    return " ".join([remove_suffix(p.get_payload(decode=True).decode('utf-8')) for p in parts])
+    parts = [p for p in msg.walk() if p.get_content_type() == 'text/plain']
+    body = " ".join([p.get_payload(decode=True).decode('utf-8') for p in parts])
+    body = remove_suffix(body)
+
+    lens = [l for l in body.splitlines() if len(l) > 76 and ' ' in l]
+    if lens:
+        return body
+
+    print("looks like fixed width")
+    lines = body.splitlines()
+    for n in range(len(lines) - 1):
+        if re.match(r'.*[.?!:]"?$', lines[n]):
+            lines[n] += "\n"
+            continue
+
+        match = re.match('(\S+)', lines[n+1])
+        if not match or len(lines[n]) + len(match.group(1)) < 76:
+            lines[n] += "\n"
+
+        else:
+            lines[n] += " " 
+
+    return "".join(lines)
 
 
 def remove_suffix(txt):
-    txt = txt.replace("=\r\n", '').replace("=\n", '')
     lines = txt.splitlines()
     for n, line in list(enumerate(lines)):
         next_line = lines[n+1] if n < len(lines)-1 else ""
-        if line == '-- ' or line == '--=20' \
-                or line.startswith('From: wheaton-ultimate@googlegroups.com') \
-                or line.startswith('To: wheaton-ultimate@googlegroups.com') \
-                or re.match(r'(> )?On .* wrote:', line) \
-                or (re.match(r'(> )?On ', line) and next_line.endswith('wrote:')) \
-                or re.match(r'-+ Original message', line) \
-                or re.match(r'-+$', line):
+        if ((line == '-- ' and next_line.startswith('---'))
+                or (re.match(r'(>+ )?On ', line) 
+                    and (line.endswith('wrote:') or next_line.endswith('wrote:')
+                        or line.startswith('You received this message because '))
+                )
+                or re.match(r'Sent from my iPhone', line) 
+                or re.match(r'Get Outlook for Android', line) 
+                or (line.starswith('> ') and all([l.startswith('> ') for l in lines[n+1:]]))
+                or line.startswith('From: wheaton-ultimate@googlegroups.com')
+                or line.startswith('To: wheaton-ultimate@googlegroups.com') 
+                or re.match(r'-+ Original message', line) 
+                #or re.match(r'-+$', line) 
+                ):
                     
+            print("Removing: %s" % lines[n:n+4])
             lines = lines[:n]
             break
 
+    while lines and lines[-1] == "":
+        lines = lines[:-1]
+
     body = "\n".join(lines)
-    body = body.replace(' Sent from my iPhone', '')
 
     patterns = [
     ]
