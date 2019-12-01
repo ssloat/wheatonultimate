@@ -10,7 +10,7 @@ def get_body(msg):
     body = " ".join([p.get_payload(decode=True).decode('utf-8') for p in parts])
     body = remove_suffix(body)
 
-    lens = [l for l in body.splitlines() if len(l) > 76 and ' ' in l]
+    lens = [l for l in body.splitlines() if len(l) > 77 and ' ' in l]
     if lens:
         return body
 
@@ -22,7 +22,7 @@ def get_body(msg):
             continue
 
         match = re.match('(\S+)', lines[n+1])
-        if not match or len(lines[n]) + len(match.group(1)) < 76:
+        if not match or len(lines[n]) + len(match.group(1)) < 71:
             lines[n] += "\n"
 
         else:
@@ -35,14 +35,13 @@ def remove_suffix(txt):
     lines = txt.splitlines()
     for n, line in list(enumerate(lines)):
         next_line = lines[n+1] if n < len(lines)-1 else ""
-        if ((line == '-- ' and next_line.startswith('---'))
+        if ((line == '-- ' and (next_line.startswith('---') or next_line.startswith('You received this message because ')))
                 or (re.match(r'(>+ )?On ', line) 
-                    and (line.endswith('wrote:') or next_line.endswith('wrote:')
-                        or line.startswith('You received this message because '))
+                    and (line.endswith('wrote:') or next_line.endswith('wrote:'))
                 )
                 or re.match(r'Sent from my iPhone', line) 
                 or re.match(r'Get Outlook for Android', line) 
-                or (line.startswith('> ') and all([l.startswith('> ') for l in lines[n+1:]]))
+                #or (line.startswith('> ') and all([l.startswith('> ') for l in lines[n+1:]]))
                 or line.startswith('From: wheaton-ultimate@googlegroups.com')
                 or line.startswith('To: wheaton-ultimate@googlegroups.com') 
                 or re.match(r'-+ Original message', line) 
