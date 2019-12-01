@@ -42,7 +42,7 @@ def remove_suffix(txt):
                 )
                 or re.match(r'Sent from my iPhone', line) 
                 or re.match(r'Get Outlook for Android', line) 
-                or (line.starswith('> ') and all([l.startswith('> ') for l in lines[n+1:]]))
+                or (line.startswith('> ') and all([l.startswith('> ') for l in lines[n+1:]]))
                 or line.startswith('From: wheaton-ultimate@googlegroups.com')
                 or line.startswith('To: wheaton-ultimate@googlegroups.com') 
                 or re.match(r'-+ Original message', line) 
