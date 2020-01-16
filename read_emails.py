@@ -45,7 +45,12 @@ def main():
 
         thread = mongo_db.threads.find_one({'id': msg['thread_id']})
         if not thread:
-            mongo_db.threads.insert_one({'id': msg['thread_id']})
+            mongo_db.threads.insert_one({
+                'id': msg['thread_id'],
+                'subject': msg['subject'],
+                'from_': msg['from_'],
+                'date': msg['date'],
+            })
 
 
 if __name__ == '__main__':
