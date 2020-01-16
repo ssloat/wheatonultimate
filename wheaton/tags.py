@@ -11,17 +11,16 @@ def msg_tags(msg):
     tags = []
     if has_time(msg['subject']):
         tags.append('event')
-        if msg['group'] == 'wheaton-soccer':
-            tags.append('soccer')
-        elif any([x in subject for x in ('monroe', 'scripture', 'lawson', 'east campus')]):
-            tags.append('ultimate')
+    elif 'looking for ' in subject:
+        tags.append('looking for')
 
-    else: 
-        if any([x in subject for x in ('rent', 'tenant', 'housing', 'roommate')]):
-            tags.append('housing')
+    if msg['group'] == 'wheaton-housing':
+        tags.append('housing')
+    elif msg['group'] == 'wheaton-soccer':
+        tags.append('soccer')
+    elif msg['group'] == 'wheaton-ultimate-frisbee':
+        tags.append('ultimate')
 
-        if 'looking for ' in subject:
-            tags.append('looking for')
 
     return tags
 

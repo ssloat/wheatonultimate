@@ -66,6 +66,13 @@ def remove_suffix(txt):
 
     return body
 
+topics = {
+    'wheaton-soccer': 'soccer',
+    'wheaton-ultimate': 'social',
+    'wheaton-ultimate-frisbee': 'ultimate',
+    'wheaton-housing': 'housing',
+}
+
 def process_msg(message, mid, thread_id):
     body = get_body(message)
     subj = message['Subject'].replace('[wheaton-ultimate] ', '')
@@ -76,13 +83,15 @@ def process_msg(message, mid, thread_id):
             content = base64.urlsafe_b64decode(part.get_payload().encode('UTF-8'))
             attachments.append((part.get_filename(), content))
 
+    group = message['List-ID'][1:-1].replace('.googlegroups.com', '')
     msg = {
         'id': mid,
         'thread_id': thread_id,
         'date': datetime.datetime.fromtimestamp(
             email.utils.mktime_tz(email.utils.parsedate_tz(message['Date']))
         ),
-        'group': message['List-ID'][1:-1].replace('.googlegroups.com', ''),
+        'group': group,
+        'topic': topics[group],
         'from': message['From'],
         'body': body,
         'subject': "".join(subj.splitlines()),
@@ -90,17 +99,6 @@ def process_msg(message, mid, thread_id):
     }
 
     msg['tags'] = tags.msg_tags(msg)
-    msg['topic'] = topic(msg)
 
     return msg
-
-def topic(msg):
-    if msg['group'] == 'wheaton-soccer':
-        return 'soccer'
-    elif 'ultimate' in msg['tags']:
-        return 'ultimate'
-    elif 'housing' in msg['tags']:
-        return 'housing'
-    else:
-        return 'social'
 

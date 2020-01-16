@@ -20,7 +20,7 @@ def main():
     date = datetime.date.today() - datetime.timedelta(days=2)
 
     query = " ".join([
-        'list:{wheaton-ultimate@googlegroups.com wheaton-soccer@googlegroups.com}',
+        'list:{%s}' % ' '.join(['wheaton-%s@googlegroups.com' % g for g in ['ultimate', 'soccer', 'housing', 'ultimate-frisbee']]),
         'subject:(-"Message Pending)',
         'after:%s' % date.strftime('%Y/%m/%d'),
     ])
