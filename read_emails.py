@@ -5,7 +5,7 @@ import logging
 
 from pymongo import MongoClient
 
-from wheaton import gmail, discord, slack
+from wheaton import gmail, discord
 
 def main():
     logging.basicConfig(
@@ -14,7 +14,6 @@ def main():
     )
 
     mongo_db = MongoClient(os.environ.get('MONGO_DB_URI'), retryWrites=False)['slack']
-    slack_bot = slack.Bot()
     inbox = gmail.Inbox()
 
     date = datetime.date.today() - datetime.timedelta(days=2)
@@ -45,11 +44,8 @@ def main():
         discord.post(**msg_args)
 
         thread = mongo_db.threads.find_one({'id': msg['thread_id']})
-        if thread:
-            slack_bot.post(thread_ts=thread['ts'], **msg_args)
-        else:
-            ts = slack_bot.post(**msg_args)
-            mongo_db.threads.insert_one({'id': msg['thread_id'], 'ts': ts})
+        if not thread:
+            mongo_db.threads.insert_one({'id': msg['thread_id']})
 
 
 if __name__ == '__main__':
