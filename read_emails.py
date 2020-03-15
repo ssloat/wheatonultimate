@@ -20,8 +20,9 @@ def main():
 
     query = " ".join([
         'list:{%s}' % ' '.join(['wheaton-%s@googlegroups.com' % g for g in ['ultimate', 'soccer', 'housing', 'ultimate-frisbee']]),
-        'subject:(-"Message Pending)',
         'after:%s' % date.strftime('%Y/%m/%d'),
+        'from:(-"+msgappr")',
+        'to:(-"+owners")',
     ])
 
     print(query)
@@ -44,12 +45,16 @@ def main():
         discord.post(**msg_args)
 
         thread = mongo_db.threads.find_one({'id': msg['thread_id']})
-        if not thread:
+        if thread:
+            mongo_db.threads.update_one({'id': msg['thread_id']}, {'$inc': {'count': 1}})
+        else:
             mongo_db.threads.insert_one({
                 'id': msg['thread_id'],
                 'subject': msg['subject'],
                 'from_': msg['from_'],
+                'group': msg['group'],
                 'date': msg['date'],
+                'count': 1,
             })
 
 
