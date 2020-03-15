@@ -35,18 +35,22 @@ def remove_suffix(txt):
     lines = txt.splitlines()
     for n, line in list(enumerate(lines)):
         next_line = lines[n+1] if n < len(lines)-1 else ""
-        if ((line == '-- ' and (next_line.startswith('---') or next_line.startswith('You received this message because ')))
-                or (re.match(r'(>+ )?On ', line) 
-                    and (line.endswith('wrote:') or next_line.endswith('wrote:'))
-                )
-                or re.match(r'Sent from my iPhone', line) 
-                or re.match(r'Get Outlook for Android', line) 
-                #or (line.startswith('> ') and all([l.startswith('> ') for l in lines[n+1:]]))
-                or line.startswith('From: wheaton-ultimate@googlegroups.com')
-                or line.startswith('To: wheaton-ultimate@googlegroups.com') 
-                or re.match(r'-+ Original message', line) 
-                #or re.match(r'-+$', line) 
-                ):
+        if ((line == '-- ' and (
+                next_line.startswith('---') 
+                or next_line.startswith('You received this message because ') 
+                or next_line.startswith('http://www.wheatonultimate.com')
+            ))
+            or (re.match(r'(>+ )?On ', line) 
+                and (line.endswith('wrote:') or next_line.endswith('wrote:'))
+            )
+            or re.match(r'Sent from my iPhone', line) 
+            or re.match(r'Get Outlook for Android', line) 
+            #or (line.startswith('> ') and all([l.startswith('> ') for l in lines[n+1:]]))
+            or line.startswith('From: wheaton-ultimate@googlegroups.com')
+            or line.startswith('To: wheaton-ultimate@googlegroups.com') 
+            or re.match(r'-+ Original message', line) 
+            #or re.match(r'-+$', line) 
+        ):
                     
             print("Removing: %s" % lines[n:n+4])
             lines = lines[:n]
