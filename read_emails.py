@@ -30,7 +30,7 @@ def main():
     mids = [mid for mid in mids if not mongo_db.emails.find_one({'id': mid})]
 
     for msg in inbox.get(mids):
-        print(dict((k, msg[k]) for k in ('from', 'subject', 'body')))
+        print(dict((k, msg.get(k, 'MISSING')) for k in ('from', 'subject', 'body')))
         mongo_db.emails.insert_one(dict((k, v) for k, v in msg.items() if k != 'attachments')) 
 
         msg_args = {
@@ -51,7 +51,7 @@ def main():
             mongo_db.threads.insert_one({
                 'id': msg['thread_id'],
                 'subject': msg['subject'],
-                'from_': msg['from_'],
+                'from': msg['from'],
                 'group': msg['group'],
                 'date': msg['date'],
                 'count': 1,
