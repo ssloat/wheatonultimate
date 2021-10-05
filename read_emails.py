@@ -23,6 +23,7 @@ def main():
         'after:%s' % date.strftime('%Y/%m/%d'),
         'from:(-"+msgappr")',
         'to:(-"+owners")',
+        'subject:(-"Google Groups: Message Pending")',
     ])
 
     print(query)
@@ -30,6 +31,9 @@ def main():
     mids = [mid for mid in mids if not mongo_db.emails.find_one({'id': mid})]
 
     for msg in inbox.get(mids):
+        if msg is None:
+            continue
+
         print(dict((k, msg.get(k, 'MISSING')) for k in ('from', 'subject', 'body')))
         mongo_db.emails.insert_one(dict((k, v) for k, v in msg.items() if k != 'attachments')) 
 

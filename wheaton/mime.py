@@ -2,6 +2,7 @@ import base64
 import datetime
 import email
 import re
+import logging
 
 from wheaton import tags
 
@@ -87,7 +88,13 @@ def process_msg(message, mid, thread_id):
             content = base64.urlsafe_b64decode(part.get_payload().encode('UTF-8'))
             attachments.append((part.get_filename(), content))
 
-    group = message['List-ID'][1:-1].replace('.googlegroups.com', '')
+    try:
+        group = message['List-ID'][1:-1].replace('.googlegroups.com', '')
+    except TypeError as te:
+        logging.warning(str(te))
+        logging.warning(message)
+        return
+
     msg = {
         'id': mid,
         'thread_id': thread_id,
