@@ -73,7 +73,7 @@ def remove_suffix(txt):
 
 topics = {
     'wheaton-soccer': 'soccer',
-    'wheaton-ultimate': 'social',
+    'wheaton-ultimate-events': 'social',
     'wheaton-ultimate-frisbee': 'ultimate',
     'wheaton-housing': 'housing',
 }
