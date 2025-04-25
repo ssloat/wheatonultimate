@@ -19,7 +19,7 @@ def main():
     date = datetime.date.today() - datetime.timedelta(days=2)
 
     query = " ".join([
-        'list:{%s}' % ' '.join(['wheaton-%s@googlegroups.com' % g for g in ['ultimate', 'soccer', 'housing', 'ultimate-frisbee']]),
+        'list:{%s}' % ' '.join(['wheaton-%s@googlegroups.com' % g for g in ['ultimate-events', 'soccer', 'housing', 'ultimate-frisbee']]),
         'after:%s' % date.strftime('%Y/%m/%d'),
         'from:(-"+msgappr")',
         'to:(-"+owners")',
